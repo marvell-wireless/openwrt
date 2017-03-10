@@ -1,0 +1,66 @@
+diff --git a/backport-include/linux/phy.h b/backport-include/linux/phy.h
+index bf28357..bd7b6b5 100644
+--- a/backport-include/linux/phy.h
++++ b/backport-include/linux/phy.h
+@@ -13,13 +13,13 @@
+ #define phydev_name LINUX_BACKPORT(phydev_name)
+ static inline const char *phydev_name(const struct phy_device *phydev)
+ {
+-	return dev_name(&phydev->dev);
++	return dev_name(&phydev->mdio.dev);
+ }
+ 
+ #define mdiobus_is_registered_device LINUX_BACKPORT(mdiobus_is_registered_device)
+ static inline bool mdiobus_is_registered_device(struct mii_bus *bus, int addr)
+ {
+-	return bus->phy_map[addr];
++	return bus->mdio_map[addr];
+ }
+ 
+ #define phy_attached_print LINUX_BACKPORT(phy_attached_print)
+@@ -30,11 +30,11 @@ void phy_attached_info(struct phy_device *phydev);
+ 
+ static inline int backport_mdiobus_register(struct mii_bus *bus)
+ {
+-	bus->irq = kmalloc(sizeof(int) * PHY_MAX_ADDR, GFP_KERNEL);
+-	if (!bus->irq) {
+-		pr_err("mii_bus irq allocation failed\n");
+-		return -ENOMEM;
+-	}
++	//bus->irq = kmalloc(sizeof(int) * PHY_MAX_ADDR, GFP_KERNEL);
++	//if (!bus->irq) {
++	//	pr_err("mii_bus irq allocation failed\n");
++	//	return -ENOMEM;
++	//}
+ 
+ 	memset(bus->irq, PHY_POLL, sizeof(int) * PHY_MAX_ADDR);
+ 
+@@ -62,7 +62,7 @@ static inline void backport_mdiobus_unregister(struct mii_bus *bus)
+ #define phydev_get_addr LINUX_BACKPORT(phydev_get_addr)
+ static inline int phydev_get_addr(struct phy_device *phydev)
+ {
+-	return phydev->addr;
++	return phydev->mdio.addr;
+ }
+ #else
+ #define phydev_get_addr LINUX_BACKPORT(phydev_get_addr)
+diff --git a/compat/backport-4.5.c b/compat/backport-4.5.c
+index bbf4f3b..3288b8b 100644
+--- a/compat/backport-4.5.c
++++ b/compat/backport-4.5.c
+@@ -107,13 +107,13 @@ EXPORT_SYMBOL_GPL(phy_attached_info);
+ void phy_attached_print(struct phy_device *phydev, const char *fmt, ...)
+ {
+ 	if (!fmt) {
+-		dev_info(&phydev->dev, ATTACHED_FMT "\n",
++		dev_info(&phydev->mdio.dev, ATTACHED_FMT "\n",
+ 			 phydev->drv->name, phydev_name(phydev),
+ 			 phydev->irq);
+ 	} else {
+ 		va_list ap;
+ 
+-		dev_info(&phydev->dev, ATTACHED_FMT,
++		dev_info(&phydev->mdio.dev, ATTACHED_FMT,
+ 			 phydev->drv->name, phydev_name(phydev),
+ 			 phydev->irq);
+ 
