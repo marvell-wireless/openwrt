@@ -1,0 +1,27 @@
+#!/bin/sh
+#
+# Copyright (C) 2017 OpenWrt.org
+#
+
+. /lib/functions/uci-defaults.sh
+. /lib/mvebu.sh
+
+board_config_update
+
+board=$(mvebu_board_name)
+
+case "$board" in
+armada-a8k-8040-db)
+	ucidef_set_interfaces_lan_wan "eth0 eth2 eth3" "eth1"
+	;;
+armada-a7k-7040-db)
+	ucidef_set_interfaces_lan_wan "eth0 eth1" "eth2"
+	;;
+*)
+	ucidef_set_interface_lan "eth0"
+	;;
+esac
+
+board_config_flush
+
+exit 0
